@@ -13,7 +13,7 @@ public class AStarSearch extends Search {
 	
 	public AStarSearch(State s)
     {
-		this(s, new HValueComparator());
+		this(s, new HGValueComparator());
 	}
 
 	public AStarSearch(State s, Comparator c)
@@ -43,7 +43,7 @@ public class AStarSearch extends Search {
 	}
 
 	public boolean needToVisit(State s) {
-		Integer Shash = new Integer(s.hashCode());
+		Integer Shash = Integer.valueOf(s.hashCode());
 		State D = (State) closed.get(Shash);
 		
 		if (closed.containsKey(Shash) && D.equals(s)) return false;
