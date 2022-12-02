@@ -95,6 +95,7 @@ public class JavaFF
 			}
 	
 			Plan plan = plan(domainFile,problemFile);
+
 	
 			if (solutionFile != null && plan != null) writePlanToFile(plan, solutionFile);
 			
@@ -131,6 +132,7 @@ public class JavaFF
 		TemporalMetricState initialState = ground.getTemporalMetricInitialState();
 		
         State goalState = performSearch(initialState);
+
                 
 		long afterPlanning = System.currentTimeMillis();
 
@@ -149,6 +151,7 @@ public class JavaFF
 
 	private static void writePlanToFile(Plan plan, File fileOut)
     {
+
 		try
 	    {
 			FileOutputStream outputStream = new FileOutputStream(fileOut);
@@ -170,20 +173,13 @@ public class JavaFF
     }
     
     public static State performSearch(TemporalMetricState initialState) {
-    	// *******************************************
-    	// Blind Search - Breadth First 
-    	// *******************************************
     	
-    	infoOutput.println("Performing Breadth First (blind) search...");
+    	infoOutput.println("Performing BestFirst (Heuristic) search...");
     	State goalState;		
-    	// create a Breadth-First Searcher
-    	AStarSearch BFS = new AStarSearch(initialState);
-    	// ... change to using the 'all actions' neighbourhood (a null filter, as it removes nothing)
-    	BFS.setFilter(NullFilter.getInstance());
-    	// and use that
-    	goalState = BFS.search();
-    	return goalState; // return the plan ****/
-      
+    	BestFirstSearch bfs = new BestFirstSearch(initialState);
+    	bfs.setFilter(NullFilter.getInstance());
+    	goalState = bfs.search();
+    	return goalState; 
     }
     
 }
