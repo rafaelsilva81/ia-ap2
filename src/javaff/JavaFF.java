@@ -48,7 +48,6 @@ import javaff.search.AStarSearch;
 import javaff.search.BestFirstSearch;
 import javaff.search.EnforcedHillClimbingSearch;
 
-
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.File;
@@ -58,128 +57,117 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Random;
 
-public class JavaFF
-{
-    public static BigDecimal EPSILON = new BigDecimal(0.01);
-	public static BigDecimal MAX_DURATION = new BigDecimal("100000"); //maximum duration in a duration constraint
-	public static boolean VALIDATE = false;
+public class JavaFF {
+  public static BigDecimal EPSILON = new BigDecimal(0.01);
+  public static BigDecimal MAX_DURATION = new BigDecimal("100000"); // maximum duration in a duration constraint
+  public static boolean VALIDATE = false;
 
-	public static Random generator = null;
+  public static Random generator = null;
 
-	public static PrintStream planOutput = System.out;
-	public static PrintStream parsingOutput = System.out;
-	public static PrintStream infoOutput = System.out;
-	public static PrintStream errorOutput = System.err;
+  public static PrintStream planOutput = System.out;
+  public static PrintStream parsingOutput = System.out;
+  public static PrintStream infoOutput = System.out;
+  public static PrintStream errorOutput = System.err;
 
-	public static void main (String args[]) {
-		EPSILON = EPSILON.setScale(2,BigDecimal.ROUND_HALF_EVEN);
-		MAX_DURATION = MAX_DURATION.setScale(2,BigDecimal.ROUND_HALF_EVEN);
-		
-		generator = new Random();
-		
-		if (args.length < 2) {
-			System.out.println("Parameters needed: domainFile.pddl problemFile.pddl [random seed] [outputfile.sol");
+  public static void main(String args[]) {
+    EPSILON = EPSILON.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+    MAX_DURATION = MAX_DURATION.setScale(2, BigDecimal.ROUND_HALF_EVEN);
 
-		} else {
-			File domainFile = new File(args[0]);
-			File problemFile = new File(args[1]);
-			File solutionFile = null;
-			if (args.length > 2)
-			{
-				generator = new Random(Integer.parseInt(args[2]));
-			}
-	
-			if (args.length > 3)
-			{
-				solutionFile = new File(args[3]);
-			}
-	
-			Plan plan = plan(domainFile,problemFile);
+    generator = new Random();
 
-	
-			if (solutionFile != null && plan != null) writePlanToFile(plan, solutionFile);
-			
-		}
-	}
+    if (args.length < 2) {
+      System.out.println("Parameters needed: domainFile.pddl problemFile.pddl [random seed] [outputfile.sol");
 
+    } else {
+      File domainFile = new File(args[0]);
+      File problemFile = new File(args[1]);
+      File solutionFile = null;
+      if (args.length > 2) {
+        generator = new Random(Integer.parseInt(args[2]));
+      }
 
-    public static Plan plan(File dFile, File pFile)
-    {
-		// ********************************
-		// Parse and Ground the Problem
-		// ********************************
-		long startTime = System.currentTimeMillis();
-		
-		UngroundProblem unground = PDDL21parser.parseFiles(dFile, pFile);
+      if (args.length > 3) {
+        solutionFile = new File(args[3]);
+      }
 
-		if (unground == null)
-		{
-			System.out.println("Parsing error - see console for details");
-			return null;
-		}
+      Plan plan = plan(domainFile, problemFile);
 
-		//PDDLPrinter.printDomainFile(unground, System.out);
-		//PDDLPrinter.printProblemFile(unground, System.out);
-
-		GroundProblem ground = unground.ground();	
-		long afterGrounding = System.currentTimeMillis();
-
-		// ********************************
-		// Search for a plan
-		// ********************************
-
-		// Get the initial state
-		TemporalMetricState initialState = ground.getTemporalMetricInitialState();
-		
-        State goalState = performSearch(initialState);
-
-                
-		long afterPlanning = System.currentTimeMillis();
-
-        TotalOrderPlan top = null;
-		if (goalState != null) top = (TotalOrderPlan) goalState.getSolution();
-		if (top != null) top.print(planOutput);
-
-		double groundingTime = (afterGrounding - startTime)/1000.00;
-		double planningTime = (afterPlanning - afterGrounding)/1000.00;
-		
-		//infoOutput.println("Instantiation Time =\t\t"+groundingTime+"sec");
-		infoOutput.println("Planning Time =\t"+planningTime+"sec");
-		
-		return top;
-	}
-
-	private static void writePlanToFile(Plan plan, File fileOut)
-    {
-
-		try
-	    {
-			FileOutputStream outputStream = new FileOutputStream(fileOut);
-			PrintWriter printWriter = new PrintWriter(outputStream);
-			plan.print(printWriter);
-			printWriter.close();
-		}
-		catch (FileNotFoundException e)
-	    {
-			errorOutput.println(e);
-			e.printStackTrace();
-		}
-		catch (IOException e)
-	    {
-			errorOutput.println(e);
-			e.printStackTrace();
-		}
+      if (solutionFile != null && plan != null)
+        writePlanToFile(plan, solutionFile);
 
     }
-    
-    public static State performSearch(TemporalMetricState initialState) {
-    	
-    	infoOutput.println("Performing BestFirst (Heuristic) search...");
-    	State goalState;		
-    	BestFirstSearch bfs = new BestFirstSearch(initialState);
-    	bfs.setFilter(NullFilter.getInstance());
-    	goalState = bfs.search();
-    	return goalState; 
+  }
+
+  public static Plan plan(File dFile, File pFile) {
+    // ********************************
+    // Parse and Ground the Problem
+    // ********************************
+    long startTime = System.currentTimeMillis();
+
+    UngroundProblem unground = PDDL21parser.parseFiles(dFile, pFile);
+
+    if (unground == null) {
+      System.out.println("Parsing error - see console for details");
+      return null;
     }
-    
+
+    // PDDLPrinter.printDomainFile(unground, System.out);
+    // PDDLPrinter.printProblemFile(unground, System.out);
+
+    GroundProblem ground = unground.ground();
+    long afterGrounding = System.currentTimeMillis();
+
+    // ********************************
+    // Search for a plan
+    // ********************************
+
+    // Get the initial state
+    TemporalMetricState initialState = ground.getTemporalMetricInitialState();
+
+    State goalState = performSearch(initialState);
+
+    long afterPlanning = System.currentTimeMillis();
+
+    TotalOrderPlan top = null;
+    if (goalState != null)
+      top = (TotalOrderPlan) goalState.getSolution();
+    if (top != null)
+      top.print(planOutput);
+
+    double groundingTime = (afterGrounding - startTime) / 1000.00;
+    double planningTime = (afterPlanning - afterGrounding) / 1000.00;
+
+    // infoOutput.println("Instantiation Time =\t\t"+groundingTime+"sec");
+    infoOutput.println("Planning Time =\t" + planningTime + "sec");
+
+    return top;
+  }
+
+  private static void writePlanToFile(Plan plan, File fileOut) {
+
+    try {
+      FileOutputStream outputStream = new FileOutputStream(fileOut);
+      PrintWriter printWriter = new PrintWriter(outputStream);
+      plan.print(printWriter);
+      printWriter.close();
+    } catch (FileNotFoundException e) {
+      errorOutput.println(e);
+      e.printStackTrace();
+    } catch (IOException e) {
+      errorOutput.println(e);
+      e.printStackTrace();
+    }
+
+  }
+
+  public static State performSearch(TemporalMetricState initialState) {
+
+    // infoOutput.println("Performing BestFirst (Heuristic) search...");
+    State goalState;
+    AStarSearch astar = new AStarSearch(initialState);
+    astar.setFilter(HelpfulFilter.getInstance());
+    goalState = astar.search();
+    return goalState;
+  }
+
 }
