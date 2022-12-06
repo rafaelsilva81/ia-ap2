@@ -69,6 +69,8 @@ public class JavaFF {
   public static PrintStream infoOutput = System.out;
   public static PrintStream errorOutput = System.err;
 
+  public static String algorithm = "A*";
+
   public static void main(String args[]) {
     EPSILON = EPSILON.setScale(2, BigDecimal.ROUND_HALF_EVEN);
     MAX_DURATION = MAX_DURATION.setScale(2, BigDecimal.ROUND_HALF_EVEN);
@@ -88,6 +90,10 @@ public class JavaFF {
 
       if (args.length > 3) {
         solutionFile = new File(args[3]);
+      }
+
+      if (args.length > 4) {
+        algorithm = args[4];
       }
 
       Plan plan = plan(domainFile, problemFile);
@@ -138,7 +144,7 @@ public class JavaFF {
     double planningTime = (afterPlanning - afterGrounding) / 1000.00;
 
     // infoOutput.println("Instantiation Time =\t\t"+groundingTime+"sec");
-    infoOutput.println("Planning Time =\t" + planningTime + "sec");
+    System.out.println("Planning Time =\t" + planningTime + "sec");
 
     return top;
   }
@@ -163,10 +169,20 @@ public class JavaFF {
   public static State performSearch(TemporalMetricState initialState) {
 
     // infoOutput.println("Performing BestFirst (Heuristic) search...");
-    State goalState;
-    AStarSearch astar = new AStarSearch(initialState);
-    astar.setFilter(HelpfulFilter.getInstance());
-    goalState = astar.search();
+    State goalState = null;
+
+    if (algorithm.equalsIgnoreCase("astar")) {
+      System.out.println("Performing A* search...");
+      AStarSearch astar = new AStarSearch(initialState);
+      astar.setFilter(HelpfulFilter.getInstance());
+      goalState = astar.search();
+    } else if (algorithm.equalsIgnoreCase("bfs")) {
+      System.out.println("Performing BestFirst search...");
+      BestFirstSearch bfs = new BestFirstSearch(initialState);
+      bfs.setFilter(HelpfulFilter.getInstance());
+      goalState = bfs.search();
+    }
+
     return goalState;
   }
 
